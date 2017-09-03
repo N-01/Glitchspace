@@ -5,6 +5,18 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+public static class Utils
+{
+
+    public static float WrapFloat(float val, float min, float max)
+    {
+        val = val - (float)Math.Round((val - min) / (max - min)) * (max - min);
+        if (val < 0)
+            val = val + max - min;
+        return val;
+    }
+}
+
 namespace Streams
 {
     public class ActionDisposable : IDisposable
@@ -160,7 +172,7 @@ namespace Streams
             get { return currentValue; }
             set
             {
-                if (object.Equals(value, currentValue) == false)
+                if (EqualityComparer<T>.Default.Equals(value, currentValue) == false)
                 {
                     currentValue = value;
 

@@ -5,7 +5,7 @@ using UnityEngine;
 public class ShipBehavior
 {
 	protected Entity puppet = null;
-	public float shotDelay = 0.35f, timeSinceLastShot = 0;
+	public float shotDelay = 0.35f, timeUntilCanShoot = 0.5f;
 
 	public void Shoot(int diretion, GameController gc)
 	{
@@ -39,13 +39,13 @@ public class HumanBehavior : ShipBehavior
 	public void Update (GameController gc, float dt) {
 		puppet.position += new Vector3(Input.GetAxis("Horizontal" + playerId), Input.GetAxis("Vertical" + playerId), 0) * puppet.speed * dt;
 
-		if (Input.GetButton("Fire" + playerId) && timeSinceLastShot <= 0)
+		if (Input.GetButton("Fire" + playerId) && timeUntilCanShoot <= 0)
 		{
-			timeSinceLastShot = shotDelay;
+			timeUntilCanShoot = shotDelay;
 			Shoot(playerId == 1 ? 1 : -1, gc);
 		}
 		else
-			timeSinceLastShot -= dt;
+			timeUntilCanShoot -= dt;
 	}
 }
 
@@ -59,10 +59,10 @@ public class AiBehavior : ShipBehavior
 
 	public List<Vector3> pattern = new List<Vector3>
 	{
-		new Vector3(0, 1.0f),
-		new Vector3(0, -1.0f),
-		new Vector3(0.5f, 0.5f),
-		new Vector3(-0.5f, 0),
+		new Vector3(0, 2.0f),
+		new Vector3(0, -2.0f),
+		new Vector3(1, 1),
+		new Vector3(-1, 0),
 		new Vector3(0, -1)
 	};
 
@@ -70,12 +70,12 @@ public class AiBehavior : ShipBehavior
 
 	public void Update(GameController gc, float dt)
 	{
-		timeSinceLastShot -= dt;
+		timeUntilCanShoot -= dt;
 
-		if (timeSinceLastShot <= 0)
+		if (timeUntilCanShoot <= 0)
 		{
 			Shoot(-1, gc);
-			timeSinceLastShot = shotDelay;
+			timeUntilCanShoot = shotDelay;
 
 			puppet.velocity = pattern[counter % pattern.Count];
 			counter++;

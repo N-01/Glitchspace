@@ -22,8 +22,8 @@ public class RetryScreen : MenuScreen {
         {
            collector += tryAgain.ClickStream().Listen(() =>
             {
-                gc.currentMode.value.Restart(gc);
                 controller.SetState(MenuScreenState.None);
+                gc.currentMode.value.Restart(gc);
             });
 
             collector += backToMenu.ClickStream().Listen(() =>

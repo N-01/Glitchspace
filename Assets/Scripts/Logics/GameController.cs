@@ -34,12 +34,13 @@ public class GameController : MonoBehaviour {
 			BinaryFormatter bf = new BinaryFormatter();
 			FileStream file = File.Open(Application.persistentDataPath + "/currentMode.dat", FileMode.Open);
 
-			try
-			{
+			try {
 				SetGameMode((GameMode) bf.Deserialize(file));
 			}
-			finally
-			{
+			catch (Exception) {
+				uiController.SetState(MenuScreenState.ModeSelect);
+			}
+			finally {
 				file.Close();
 			}
 		}
@@ -65,8 +66,8 @@ public class GameController : MonoBehaviour {
 
 		if (mode != null)
 		{
-			mode.Start(this);
 			uiController.SetState(MenuScreenState.None);
+			mode.Start(this);
 		}
 
 		currentMode.value = mode;
@@ -87,7 +88,7 @@ public class GameController : MonoBehaviour {
 			entity.UpdateBehavior(this, dt);
 		}
 
-		sceneController.UpdateViews();
+		sceneController.UpdateViews(dt);
 
 		BringOutTheDead();
 	}
@@ -105,7 +106,7 @@ public class GameController : MonoBehaviour {
 
 		foreach (var e in entities)
 		{
-			if (e.health.value <= 0)
+			if (e.health.value <= 0 && e.dead == false)
 			{
 				e.dead = true;
 
@@ -116,7 +117,7 @@ public class GameController : MonoBehaviour {
 
 		//swap entities so dead ones are at the end
 		int backWardsIndex = entities.Count - 1;
-		for (int forwardIndex = 0; forwardIndex < backWardsIndex; forwardIndex++)
+		for (int forwardIndex = 0; forwardIndex <= backWardsIndex; forwardIndex++)
 		{
 			if (!entities[forwardIndex].dead)
 				continue;
@@ -124,17 +125,20 @@ public class GameController : MonoBehaviour {
 			DestroyEntity(entities[forwardIndex]);
 			toRemove++;
 
-			while (entities[backWardsIndex].dead)
+			if (backWardsIndex > forwardIndex)
 			{
-				DestroyEntity(entities[backWardsIndex]);
-				toRemove++;
+				while (entities[backWardsIndex].dead)
+				{
+					DestroyEntity(entities[backWardsIndex]);
+					toRemove++;
+					backWardsIndex--;
+
+					if (backWardsIndex == forwardIndex) goto finish;
+				}
+
+				entities.Swap(forwardIndex, backWardsIndex);
 				backWardsIndex--;
-
-				if (backWardsIndex == forwardIndex) goto finish;
 			}
-
-			entities.Swap(forwardIndex, backWardsIndex);
-			backWardsIndex--;
 		}
 
 		finish:

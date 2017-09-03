@@ -5,15 +5,11 @@ using Streams;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public interface IAsteroidSpawner
-{
-    IEnumerator Spawn(GameController gc);
-}
-
 [Serializable]
-public class AsteroidSpawnerBasic : IAsteroidSpawner
+public class AsteroidSpawnerBasic
 {
     public float interval;
+    public float speed = 5;
 
     [NonSerialized]
     public EmptyStream deadAsteroidStream = new EmptyStream();
@@ -33,18 +29,60 @@ public class AsteroidSpawnerBasic : IAsteroidSpawner
                 var asteroid = new Asteroid
                 {
                     position = new Vector3(GameController.horizontalBoundary, Random.Range(-GameController.verticalBoudnary, GameController.verticalBoudnary), 0),
-                    velocity = new Vector3(Random.Range(-5, -7), 0, 0),
+                    velocity = new Vector3(Random.Range(-1, -1.2f) * speed, 0, 0),
                     scale = 1 + size * 0.25f,
                     health = new Cell<int>(size)
                 };
 
                 gc.SpawnEntity(asteroid, "Asteroid_" + size);
+
+                //speed thigs up a bit
+                speed += 0.05f;
+                interval = Mathf.Max(interval - 0.03f, 0.1f);
             }
 
             yield return new WaitForSeconds(interval);
+        }
+    }
+}
 
-            //speed thigs up a bit
-            interval = Mathf.Max(interval - 0.05f, 0.2f);
+[Serializable]
+public class AsteroidSpawnerCircular
+{
+    public float interval;
+    public float speed = 5;
+
+    [NonSerialized]
+    public EmptyStream deadAsteroidStream = new EmptyStream();
+
+    public AsteroidSpawnerCircular(float _interval)
+    {
+        interval = _interval;
+    }
+
+    public IEnumerator Spawn(GameController gc)
+    {
+        while (true)
+        {
+            if (!gc.paused)
+            {
+                int size = Random.Range(1, 4);
+                var asteroid = new Asteroid
+                {
+                    position = new Vector3(Random.Range(-GameController.horizontalBoundary, GameController.horizontalBoundary), GameController.verticalBoudnary, 0),
+                    velocity = new Vector3(0, -1, 0) * speed,
+                    scale = 1 + size * 0.25f,
+                    health = new Cell<int>(size)
+                };
+
+                gc.SpawnEntity(asteroid, "Asteroid_" + size);
+
+                //speed thigs up a bit
+                speed += 0.025f;
+                interval = Mathf.Max(interval - 0.015f, 0.5f);
+            }
+
+            yield return new WaitForSeconds(interval);
         }
     }
 }

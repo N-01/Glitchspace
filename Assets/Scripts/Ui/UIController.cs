@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Streams;
 using UnityEngine;
@@ -53,8 +54,15 @@ public class UIController : MonoBehaviour
             screen.controller = this;
         }
 
-        pauseButton.ClickStream().Listen(() => { SetState(MenuScreenState.Pause); });
-        gc.currentMode.Bind(m => { currentScore.gameObject.SetActive(m is NormalGameMode); });
+        pauseButton.OnClickDo(() =>
+        {
+            SetState(MenuScreenState.Pause);
+        });
+
+        gc.currentMode.Bind(m =>
+        {
+            currentScore.gameObject.SetActive(m is NormalGameMode);
+        });
     }
 
     public void SetState(MenuScreenState state)
@@ -77,7 +85,23 @@ public class UIController : MonoBehaviour
             currentState = null;
         }
 
+        leftHealthBar.SetActive(false);
+        rightHealthBar.SetActive(false);
+
         background.gameObject.SetActive(state != MenuScreenState.None);
         gc.paused = state != MenuScreenState.None;
+    }
+
+    public IDisposable ShowEntityHealth(Entity e, bool left)
+    {
+        if(left)
+            leftHealthBar.SetActive(true);
+        else
+            rightHealthBar.SetActive(true);
+
+        var bar = left ? leftHealthBarFill : rightHealthBarFill;
+
+        float startingHealth = e.health.value;
+        return e.health.Bind(h => bar.fillAmount = h / startingHealth);
     }
 }

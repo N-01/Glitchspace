@@ -38,7 +38,7 @@ public abstract class GameMode
 [Serializable]
 public class NormalGameMode : GameMode
 {
-    public Ship firstPlayerShip;
+    public Ship playerShip;
     public Cell<int> currentScore = new Cell<int>(0);
     public AsteroidSpawnerBasic asteroidSpawner;
 
@@ -57,7 +57,7 @@ public class NormalGameMode : GameMode
 
     public override void Init()
     {
-        firstPlayerShip = new Ship();
+        playerShip = new Ship();
         currentScore.value = 0;
         asteroidSpawner = new AsteroidSpawnerBasic(1f);
         accumulatedDt = 0;
@@ -65,34 +65,24 @@ public class NormalGameMode : GameMode
 
     public override void Start(GameController gc)
     {
-        input = new HumanBehavior(firstPlayerShip, 1);
-        gc.SpawnEntity(firstPlayerShip, "ship_blue");
+        input = new HumanBehavior(playerShip, 1);
+        gc.SpawnEntity(playerShip, "ship_blue");
         
         spawnCoro = gc.StartCoroutine(asteroidSpawner.Spawn(gc));
 
         collector += gc.asteroidDestroyed.Listen(() =>
         {
-            if(firstPlayerShip.health.value > 0)
+            if(playerShip.health.value > 0)
                 currentScore.value += 10;
         });
 
         collector += currentScore.Bind(score => gc.uiController.currentScore.text = "Score: " + score);
-
-        gc.uiController.leftHealthBar.SetActive(true);
-        gc.uiController.rightHealthBar.SetActive(false);
-
-        collector += firstPlayerShip.health.Bind(h => gc.uiController.leftHealthBarFill.fillAmount = h / 3.0f);
-    }
-
-    public override void Finish(GameController gc)
-    {
-        base.Finish(gc);
-        gc.StopCoroutine(spawnCoro);
+        collector += gc.uiController.ShowEntityHealth(playerShip, true);
     }
 
     public override void Tick(float dt, GameController gc)
     {
-        if (firstPlayerShip.health.value <= 0)
+        if (playerShip.health.value <= 0)
         {
             gc.uiController.SetState(MenuScreenState.Retry);
             return;
@@ -108,6 +98,12 @@ public class NormalGameMode : GameMode
 
         input.Update(gc, dt);
     }
+
+    public override void Finish(GameController gc)
+    {
+        base.Finish(gc);
+        gc.StopCoroutine(spawnCoro);
+    }
 }
 
 [Serializable]
@@ -116,13 +112,12 @@ public class VsComputer : GameMode
     public Ship playerShip;
     public Ship enemyShip;
 
-
     [NonSerialized]
     public HumanBehavior playerBehavior;
 
-
     [NonSerialized]
     public AiBehavior enemyBehavior;
+
 
     public VsComputer()
     {
@@ -135,7 +130,7 @@ public class VsComputer : GameMode
         playerShip.position = new Vector3(-5, 0, 0);
 
         enemyShip = new Ship();
-        enemyShip.angle = 180;
+        enemyShip.rotation.z = 180;
         enemyShip.speed = 8;
 
         enemyShip.position = new Vector3(5, 0, 0);
@@ -149,11 +144,8 @@ public class VsComputer : GameMode
         enemyBehavior = new AiBehavior(enemyShip);
         gc.SpawnEntity(enemyShip, "ship_red");
 
-        gc.uiController.leftHealthBar.SetActive(true);
-        gc.uiController.rightHealthBar.SetActive(true);
-
-        collector += playerShip.health.Bind(h => gc.uiController.leftHealthBarFill.fillAmount = h / 3.0f);
-        collector += enemyShip.health.Bind(h => gc.uiController.rightHealthBarFill.fillAmount = h / 3.0f);
+        collector += gc.uiController.ShowEntityHealth(playerShip, true);
+        collector += gc.uiController.ShowEntityHealth(enemyShip, false);
     }
 
     public override void Tick(float dt, GameController gc)
@@ -172,13 +164,17 @@ public class VsPlayer : GameMode
     public Ship firstPlayerShip;
     public Ship secondPlayerShip;
 
+    public AsteroidSpawnerCircular asteroidSpawner;
+
 
     [NonSerialized]
     public HumanBehavior firstPlayerBehavior;
 
-
     [NonSerialized]
     public HumanBehavior secondPlayerBehavior;
+
+    [NonSerialized]
+    private Coroutine spawnCoro;
 
     public VsPlayer()
     {
@@ -191,8 +187,10 @@ public class VsPlayer : GameMode
         firstPlayerShip.position = new Vector3(-5, 0, 0);
 
         secondPlayerShip = new Ship();
-        secondPlayerShip.angle = 180;
+        secondPlayerShip.rotation.z = 180;
         secondPlayerShip.position = new Vector3(5, 0, 0);
+
+        asteroidSpawner = new AsteroidSpawnerCircular(0.5f);
     }
 
     public override void Start(GameController gc)
@@ -206,8 +204,10 @@ public class VsPlayer : GameMode
         gc.uiController.leftHealthBar.SetActive(true);
         gc.uiController.rightHealthBar.SetActive(true);
 
-        collector += firstPlayerShip.health.Bind(h => gc.uiController.leftHealthBarFill.fillAmount = h / 3.0f);
-        collector += secondPlayerShip.health.Bind(h => gc.uiController.rightHealthBarFill.fillAmount = h / 3.0f);
+        collector += gc.uiController.ShowEntityHealth(firstPlayerShip, true);
+        collector += gc.uiController.ShowEntityHealth(secondPlayerShip, false);
+
+        spawnCoro = gc.StartCoroutine(asteroidSpawner.Spawn(gc));
     }
 
     public override void Tick(float dt, GameController gc)
@@ -217,5 +217,11 @@ public class VsPlayer : GameMode
 
         firstPlayerBehavior.Update(gc, dt);
         secondPlayerBehavior.Update(gc, dt);
+    }
+
+    public override void Finish(GameController gc)
+    {
+        base.Finish(gc);
+        gc.StopCoroutine(spawnCoro);
     }
 }

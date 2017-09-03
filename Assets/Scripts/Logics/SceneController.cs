@@ -8,16 +8,22 @@ public class SceneController : MonoBehaviour {
 
     private List<EntityView> activeViews = new List<EntityView>();
 
+    public Renderer bgRenderer;
+    public PingPongQuad quad;
+ 
+    private float scrollAmount = 0;
+    public float scrollSpeed = 0.002f;
+
     //pool to reuse gameobjects from
     private List<EntityView> recycledViews = new List<EntityView>();
     private Dictionary<string, EntityView> prefabs = new Dictionary<string, EntityView>();
 
-    public void UpdateViews()
+    public void UpdateViews(float dt)
     {
         foreach (var view in activeViews)
         {
             view.transform.position = view.entity.position;
-            view.transform.rotation = Quaternion.Euler(0, 0, view.entity.angle);
+            view.transform.rotation = Quaternion.Euler(view.entity.rotation);
 
             if (view.entity.health.value <= 0 && !view.entity.dead)
             {
@@ -26,6 +32,10 @@ public class SceneController : MonoBehaviour {
                 RecycleDelayed(explosion, 0.3f);
             }
         }
+
+        scrollAmount = Utils.WrapFloat(scrollAmount + scrollSpeed * dt, 0, float.MaxValue);
+        bgRenderer.material.SetFloat("scroll", scrollAmount);
+        quad.Swap();
     }
 
     public EntityView SpawnPrefab(string name)

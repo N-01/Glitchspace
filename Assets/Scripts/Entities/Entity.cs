@@ -8,13 +8,13 @@ using Random = UnityEngine.Random;
 [Serializable]
 public class Entity
 {
-    public SerializableVector3 position, velocity;
+    public SerializableVector3 position, rotation, velocity;
 
     public float scale = 1;
-    public float angle;
     public float speed = 10;
 
     public Cell<int> health = new Cell<int>(1);
+
     public bool dead = false;
 
     public virtual void OnCollision(string otherTag)
@@ -58,7 +58,8 @@ public class Asteroid : Entity
     public override void UpdateBehavior(GameController gc, float dt)
     {
         base.UpdateBehavior(gc, dt);
-        angle += rotationSpeed;
+        rotation.x = rotation.x + rotationSpeed * 0.5f;
+        rotation.z = rotation.z + rotationSpeed;
     }
 }
 
