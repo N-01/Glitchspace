@@ -57,7 +57,7 @@
 
 			col = tex2D(_MainTex, IN.uv_MainTex - (float2(dx, dy)) * 0.15);
 
-			float3 finalCol = pow(lerp(float3(col.r - dx * 0.2, col.g , col.b - dy * 0.5), float3(noise, noise, noise), 0.16) * 0.85, 1.2) * 1.15;
+			float3 finalCol = pow(lerp(float3(col.r - dx * 0.2, col.g , col.b - dy * 0.5), float3(noise, noise, noise), 0.16) * 0.85, 1.2) * 1.1;
 
 			o.Albedo = finalCol;
 			o.Alpha = 1;
