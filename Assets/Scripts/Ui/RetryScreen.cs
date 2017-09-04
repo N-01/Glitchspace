@@ -39,9 +39,6 @@ public class RetryScreen : MenuScreen {
             if (normalGameMode != null)
                 finalScore.text = "Your score: " + normalGameMode.currentScore.value;
 
-            saveScore.gameObject.SetActive(normalGameMode != null);
-            nameInput.gameObject.SetActive(normalGameMode != null);
-
             saveScore.interactable = true;
 
             collector += saveScore.ClickStream().Listen(() =>

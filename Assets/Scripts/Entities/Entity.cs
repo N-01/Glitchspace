@@ -17,20 +17,20 @@ public class Entity
 
     public bool dead = false;
 
-    public virtual void OnCollision(string otherTag)
-    {
-        
-    }
+    //return value signifies if collision passed filters
+    public virtual bool OnCollision(string otherTag) { return false; }
 
     public virtual void UpdateBehavior(GameController gc, float dt)
     {
         position += (Vector3)velocity * dt * speed;
 
-        if (position.x > GameController.horizontalBoundary  + 1 ||
-            position.x < -GameController.horizontalBoundary - 1 ||
-            position.y > GameController.verticalBoudnary    + 1 ||
-            position.y < -GameController.verticalBoudnary   - 1)
-        dead = true;
+        if (position.x >  GameController.horizontalBoundary + 1
+        ||  position.x < -GameController.horizontalBoundary - 1
+        ||  position.y >  GameController.verticalBoudnary   + 1
+        ||  position.y < -GameController.verticalBoudnary   - 1)
+        {
+            dead = true;
+        }
     }
 }
 
@@ -47,12 +47,14 @@ public class Asteroid : Entity
         rotationSpeed = Random.Range(0.5f, 2.0f);
     }
 
-    public override void OnCollision(string otherTag)
+    public override bool OnCollision(string otherTag)
     {
         if (health.value > 0 && otherTag == "Blast")
             health.value--;
         else
             health.value = 0;
+
+        return true;
     }
 
     public override void UpdateBehavior(GameController gc, float dt)
@@ -71,9 +73,10 @@ public class Blast : Entity
         speed = 20;
     }
 
-    public override void OnCollision(string otherTag)
+    public override bool OnCollision(string otherTag)
     {
         dead = true;
+        return true;
     }
 }
 
@@ -94,9 +97,14 @@ public class Ship : Entity
         position.y = Mathf.Clamp(position.y, -GameController.verticalBoudnary, GameController.verticalBoudnary);
     }
 
-    public override void OnCollision(string otherTag)
+    public override bool OnCollision(string otherTag)
     {
         if (health.value > 0 && otherTag != "Ship")
+        {
             health.value--;
+            return true;
+        }
+
+        return false;
     }
 }

@@ -22,8 +22,7 @@ public class SceneController : MonoBehaviour {
     {
         foreach (var view in activeViews)
         {
-            view.transform.position = view.entity.position;
-            view.transform.rotation = Quaternion.Euler(view.entity.rotation);
+            view.Tick(dt);
 
             if (view.entity.health.value <= 0 && !view.entity.dead)
             {
@@ -107,8 +106,7 @@ public class SceneController : MonoBehaviour {
 
     public void Reset()
     {
-        foreach (var v in activeViews)
-        {
+        foreach (var v in activeViews) {
             DestroyObject(v);
         }
 

@@ -8,8 +8,6 @@ public class PingPongQuad : MonoBehaviour {
 	public RenderTexture[] renderTextures = new RenderTexture[2];
 	public Material mat;
 
-	float time = 0;
-
 	// Use this for initialization
 	void Awake () {
 		cam = GetComponent<Camera>();
@@ -20,10 +18,9 @@ public class PingPongQuad : MonoBehaviour {
 
 	// Update is called once per frame
 	public int currentFrame = 0;
-	int frameCount = 0;
+
 	public void Swap()
 	{
-		time += Time.deltaTime;
 		mat.SetTexture("_MainTex", renderTextures[1 - currentFrame]);
 		cam.targetTexture = renderTextures[currentFrame];
 

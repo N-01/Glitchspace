@@ -42,7 +42,6 @@ public class NormalGameMode : GameMode
     public Cell<int> currentScore = new Cell<int>(0);
     public AsteroidSpawnerBasic asteroidSpawner;
 
-    [NonSerialized]
     public HumanBehavior input;
 
     private float accumulatedDt = 0;
@@ -112,10 +111,7 @@ public class VsComputer : GameMode
     public Ship playerShip;
     public Ship enemyShip;
 
-    [NonSerialized]
     public HumanBehavior playerBehavior;
-
-    [NonSerialized]
     public AiBehavior enemyBehavior;
 
 
@@ -164,13 +160,9 @@ public class VsPlayer : GameMode
     public Ship firstPlayerShip;
     public Ship secondPlayerShip;
 
-    public AsteroidSpawnerCircular asteroidSpawner;
+    public AsteroidSpawnerTopDown asteroidSpawner;
 
-
-    [NonSerialized]
     public HumanBehavior firstPlayerBehavior;
-
-    [NonSerialized]
     public HumanBehavior secondPlayerBehavior;
 
     [NonSerialized]
@@ -190,7 +182,7 @@ public class VsPlayer : GameMode
         secondPlayerShip.rotation.z = 180;
         secondPlayerShip.position = new Vector3(5, 0, 0);
 
-        asteroidSpawner = new AsteroidSpawnerCircular(0.5f);
+        asteroidSpawner = new AsteroidSpawnerTopDown(0.5f);
     }
 
     public override void Start(GameController gc)
@@ -200,9 +192,6 @@ public class VsPlayer : GameMode
 
         secondPlayerBehavior = new HumanBehavior(secondPlayerShip, 2);
         gc.SpawnEntity(secondPlayerShip, "ship_red");
-
-        gc.uiController.leftHealthBar.SetActive(true);
-        gc.uiController.rightHealthBar.SetActive(true);
 
         collector += gc.uiController.ShowEntityHealth(firstPlayerShip, true);
         collector += gc.uiController.ShowEntityHealth(secondPlayerShip, false);
