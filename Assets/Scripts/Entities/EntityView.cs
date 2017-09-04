@@ -10,6 +10,8 @@ public class EntityView : MonoBehaviour {
 
     public void SetVisible(bool state)
     {
+        //you can actually avoid SetActive through enablind/disabling components
+        //but i kept it simple
         gameObject.SetActive(state);
         damageBlink = 0;
     }
